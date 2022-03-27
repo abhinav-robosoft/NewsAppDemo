@@ -6,7 +6,6 @@ import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.example.newsappdemo.R
-import com.example.newsappdemo.ui.NewsActivity
 import com.example.newsappdemo.ui.NewsViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_article.*
@@ -15,7 +14,7 @@ import org.koin.android.ext.android.get
 class ArticleFragment : Fragment(R.layout.fragment_article) {
 
     private val viewModel: NewsViewModel = get()
-    val args: ArticleFragmentArgs by navArgs()
+    private val args: ArticleFragmentArgs by navArgs()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

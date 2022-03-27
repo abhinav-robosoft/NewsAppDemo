@@ -9,7 +9,6 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.newsappdemo.R
-import com.example.newsappdemo.adapters.NewsAdapter
 import com.example.newsappdemo.adapters.NewsAdapterForDb
 import com.example.newsappdemo.ui.NewsViewModel
 import com.example.newsappdemo.util.Constants.SEARCH_NEWS_TIME_DELAY
@@ -53,13 +52,6 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
             }
         }
 
-//        viewModel.searchNews?.observeForever {
-//            it?.toString()?.let { it1 -> Log.d("Abhinav", it1) } ?: kotlin.run {
-//                Log.d("Abhinav", "empty") }
-//
-//            newsAdapter.submitData(viewLifecycleOwner.lifecycle, it)
-//        }
-//
         viewModel.searchNews.observe(viewLifecycleOwner, Observer { response ->
             when (response) {
                 is Resource.Success -> {

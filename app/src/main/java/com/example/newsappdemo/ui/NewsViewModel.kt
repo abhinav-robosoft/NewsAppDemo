@@ -1,7 +1,8 @@
 package com.example.newsappdemo.ui
 
-import androidx.lifecycle.*
-import androidx.paging.PagingData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.example.newsappdemo.models.Article
 import com.example.newsappdemo.models.NewsResponse
@@ -15,7 +16,6 @@ class NewsViewModel(
 ) : ViewModel() {
 
     val breakingNews = newsRepository.getBreakingNews().cachedIn(viewModelScope)
-    // var searchNews : MutableLiveData<PagingData<Article>>? = null
 
     val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
 
@@ -29,18 +29,6 @@ class NewsViewModel(
         newsRepository.deleteArticle(article)
     }
 
-//    fun searchNews(searchQuery: String){
-//        searchNews = newsRepository.searchNews(searchQuery)?.cachedIn(viewModelScope) as MutableLiveData<PagingData<Article>>?
-//    }
-
-//    fun setSearchKey(key : String){
-//        newsRepository.setSearchKey(key)
-//        searchNews = newsRepository.searchNews()?.cachedIn(viewModelScope)
-//    }
-
-    //    fun getSearchResult(searchKey : String) {
-//        searchNews = newsRepository.searchNews(searchKey) as MutableLiveData<PagingData<Article>>?
-//    }
     fun searchNews(searchQuery: String) = viewModelScope.launch {
         searchNews.postValue(Resource.Loading())
         val response = newsRepository.searchNews(searchQuery, 1)
