@@ -20,7 +20,6 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
     private val viewModel: NewsViewModel = get()
     lateinit var newsAdapter: NewsAdapter
-    private val TAG = "BreakingNewsFragment"
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -35,25 +34,29 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
             )
         }
 
-        viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
-            when (response) {
-                is Resource.Success -> {
-                    hideProgressBar()
-                    response.data?.let { newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.articles)
-                    }
-                }
-                is Resource.Error -> {
-                    hideProgressBar()
-                    response.message?.let { message ->
-                        Log.e(TAG, "An error occured: $message")
-                    }
-                }
-                is Resource.Loading -> {
-                    showProgressBar()
-                }
-            }
-        })
+//        viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
+//            when (response) {
+//                is Resource.Success -> {
+//                    hideProgressBar()
+//                    response.data?.let { newsResponse ->
+//                        newsAdapter.differ.submitList(newsResponse.articles)
+//                    }
+//                }
+//                is Resource.Error -> {
+//                    hideProgressBar()
+//                    response.message?.let { message ->
+//                        Log.e(TAG, "An error occured: $message")
+//                    }
+//                }
+//                is Resource.Loading -> {
+//                    showProgressBar()
+//                }
+//            }
+//        })
+
+        viewModel.breakingNews.observeForever {
+            newsAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+        }
     }
 
     private fun hideProgressBar() {

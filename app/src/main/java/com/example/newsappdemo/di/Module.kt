@@ -1,11 +1,8 @@
 package com.example.newsappdemo.di
 
-import android.app.Application
-import androidx.room.Room
-import com.example.newsappdemo.db.ArticleDetailsDao
-import com.example.newsappdemo.db.ArticleDetailsDatabase
 import com.example.newsappdemo.network.NewsApi
 import com.example.newsappdemo.newsrepository.NewsRepository
+import com.example.newsappdemo.ui.NewsPagingDataSource
 import com.example.newsappdemo.ui.NewsViewModel
 import com.example.newsappdemo.util.getDao
 import com.example.newsappdemo.util.getDataBase
@@ -21,17 +18,19 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 
 val viewModelModule: Module = module {
-
     viewModel { NewsViewModel(get()) }
-
 }
 
 val apiModule: Module = module {
     single(createdAtStart = false) { get<Retrofit>().create(NewsApi::class.java) }
 }
 
+val pagingModule = module {
+    single {NewsPagingDataSource(get())}
+}
+
 val repositoryModule = module {
-    single { NewsRepository(get(), get()) }
+    single { NewsRepository(get(), get(), get()) }
 }
 
 val retrofitModule = module {

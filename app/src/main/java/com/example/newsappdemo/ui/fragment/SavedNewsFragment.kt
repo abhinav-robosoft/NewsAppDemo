@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.newsappdemo.R
-import com.example.newsappdemo.adapters.NewsAdapter
+import com.example.newsappdemo.adapters.NewsAdapterForDb
 import com.example.newsappdemo.ui.NewsViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_saved_news.*
@@ -18,13 +18,12 @@ import org.koin.android.ext.android.get
 class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
 
     private val viewModel: NewsViewModel = get()
-    lateinit var newsAdapter: NewsAdapter
+    lateinit var newsAdapterForDb: NewsAdapterForDb
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerView()
-        newsAdapter.setOnItemClickListener {
+        newsAdapterForDb.setOnItemClickListener {
             val bundle = Bundle().apply {
                 putSerializable("article", it)
             }
@@ -48,7 +47,7 @@ class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
-                val article = newsAdapter.differ.currentList[position]
+                val article = newsAdapterForDb.differ.currentList[position]
                 viewModel.deleteArticle(article)
                 Snackbar.make(view, "Successfully deleted article", Snackbar.LENGTH_LONG).apply {
                     setAction("Undo") {
@@ -64,14 +63,14 @@ class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
         }
 
         viewModel.getSavedNews().observe(viewLifecycleOwner, Observer { articles ->
-            newsAdapter.differ.submitList(articles)
+            newsAdapterForDb.differ.submitList(articles)
         })
     }
 
     private fun setupRecyclerView() {
-        newsAdapter = NewsAdapter()
+        newsAdapterForDb = NewsAdapterForDb()
         rvSavedNews.apply {
-            adapter = newsAdapter
+            adapter = newsAdapterForDb
             layoutManager = LinearLayoutManager(activity)
         }
     }

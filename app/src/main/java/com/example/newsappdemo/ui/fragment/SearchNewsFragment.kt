@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.newsappdemo.R
 import com.example.newsappdemo.adapters.NewsAdapter
+import com.example.newsappdemo.adapters.NewsAdapterForDb
 import com.example.newsappdemo.ui.NewsViewModel
 import com.example.newsappdemo.util.Constants.SEARCH_NEWS_TIME_DELAY
 import com.example.newsappdemo.util.Resource
@@ -20,16 +21,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 
+private const val  TAG = "SearchNewsFragment"
 class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
     private val viewModel: NewsViewModel = get()
-    lateinit var newsAdapter: NewsAdapter
-    val TAG = "SearchNewsFragment"
+    lateinit var newsAdapterForDb: NewsAdapterForDb
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
-        newsAdapter.setOnItemClickListener {
+        newsAdapterForDb.setOnItemClickListener {
             val bundle = Bundle().apply {
                 putSerializable("article", it)
             }
@@ -46,18 +47,25 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                 delay(SEARCH_NEWS_TIME_DELAY)
                 editable?.let {
                     if (editable.toString().isNotEmpty()) {
-                        viewModel.searchNews(editable.toString())
+                       viewModel.searchNews(editable.toString())
                     }
                 }
             }
         }
 
+//        viewModel.searchNews?.observeForever {
+//            it?.toString()?.let { it1 -> Log.d("Abhinav", it1) } ?: kotlin.run {
+//                Log.d("Abhinav", "empty") }
+//
+//            newsAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+//        }
+//
         viewModel.searchNews.observe(viewLifecycleOwner, Observer { response ->
             when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.articles)
+                        newsAdapterForDb.differ.submitList(newsResponse.articles)
                     }
                 }
                 is Resource.Error -> {
@@ -82,9 +90,9 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
     }
 
     private fun setupRecyclerView() {
-        newsAdapter = NewsAdapter()
+        newsAdapterForDb = NewsAdapterForDb()
         rvSearchNews.apply {
-            adapter = newsAdapter
+            adapter = newsAdapterForDb
             layoutManager = LinearLayoutManager(activity)
         }
     }

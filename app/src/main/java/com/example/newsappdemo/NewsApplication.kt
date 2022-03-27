@@ -17,7 +17,8 @@ class NewsApplication : Application() {
                     viewModelModule,
                     repositoryModule,
                     retrofitModule,
-                    articleDetailsDatabase
+                    articleDetailsDatabase,
+                    pagingModule
                 )
             )
         }
