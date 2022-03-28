@@ -7,6 +7,7 @@ import com.example.newsappdemo.db.ArticleDetailsDatabase
 import com.example.newsappdemo.models.Article
 import com.example.newsappdemo.network.NewsApi
 import com.example.newsappdemo.ui.NewsPagingDataSource
+import com.example.newsappdemo.ui.SearchNewsPagingDataSource
 
 class NewsRepository(
     private val newsApi: NewsApi,
@@ -24,8 +25,15 @@ class NewsRepository(
             pagingSourceFactory = { newsPagingDataSource }
         ).liveData
 
-    suspend fun searchNews(searchQuery: String, pageNumber: Int) =
-        newsApi.searchResultForNews(searchQuery, pageNumber)
+    fun searchNews(searchQuery: String) =
+        Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                maxSize = 100,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { SearchNewsPagingDataSource(newsApi, searchQuery) }
+        ).liveData
 
     suspend fun upsert(article: Article) = db.articleDetailsDao.upsert(article)
 

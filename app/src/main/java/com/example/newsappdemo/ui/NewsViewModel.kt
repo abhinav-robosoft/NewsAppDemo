@@ -2,14 +2,13 @@ package com.example.newsappdemo.ui
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.example.newsappdemo.models.Article
-import com.example.newsappdemo.models.NewsResponse
 import com.example.newsappdemo.newsrepository.NewsRepository
-import com.example.newsappdemo.util.Resource
+import com.example.newsappdemo.util.Constants
 import kotlinx.coroutines.launch
-import retrofit2.Response
 
 class NewsViewModel(
     private val newsRepository: NewsRepository
@@ -17,7 +16,15 @@ class NewsViewModel(
 
     val breakingNews = newsRepository.getBreakingNews().cachedIn(viewModelScope)
 
-    val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+    private val currentQuery = MutableLiveData(Constants.DEFAULT_SEARCH_QUARY)
+
+    val searchNews = currentQuery.switchMap { queryString ->
+        newsRepository.searchNews(queryString).cachedIn(viewModelScope)
+    }
+
+    fun searchQuery(query: String) {
+        currentQuery.postValue(query)
+    }
 
     fun saveArticle(article: Article) = viewModelScope.launch {
         newsRepository.upsert(article)
@@ -29,20 +36,6 @@ class NewsViewModel(
         newsRepository.deleteArticle(article)
     }
 
-    fun searchNews(searchQuery: String) = viewModelScope.launch {
-        searchNews.postValue(Resource.Loading())
-        val response = newsRepository.searchNews(searchQuery, 1)
-        searchNews.postValue(handleSearchNewsResponse(response))
-    }
-
-    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
-            }
-        }
-        return Resource.Error(response.message())
-    }
 }
 
 

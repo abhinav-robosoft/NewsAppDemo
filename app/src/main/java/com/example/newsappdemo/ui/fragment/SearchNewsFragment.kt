@@ -1,18 +1,17 @@
 package com.example.newsappdemo.ui.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.newsappdemo.R
-import com.example.newsappdemo.adapters.NewsAdapterForDb
+import com.example.newsappdemo.adapters.NewsAdapter
 import com.example.newsappdemo.ui.NewsViewModel
 import com.example.newsappdemo.util.Constants.SEARCH_NEWS_TIME_DELAY
-import com.example.newsappdemo.util.Resource
 import kotlinx.android.synthetic.main.fragment_search_news.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -20,16 +19,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 
-private const val  TAG = "SearchNewsFragment"
+private const val TAG = "SearchNewsFragment"
+
 class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
     private val viewModel: NewsViewModel = get()
-    lateinit var newsAdapterForDb: NewsAdapterForDb
+    lateinit var newsAdapter: NewsAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
-        newsAdapterForDb.setOnItemClickListener {
+        newsAdapter.setOnItemClickListener {
             val bundle = Bundle().apply {
                 putSerializable("article", it)
             }
@@ -46,45 +46,26 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                 delay(SEARCH_NEWS_TIME_DELAY)
                 editable?.let {
                     if (editable.toString().isNotEmpty()) {
-                       viewModel.searchNews(editable.toString())
+                        viewModel.searchQuery(editable.toString())
                     }
                 }
             }
         }
 
-        viewModel.searchNews.observe(viewLifecycleOwner, Observer { response ->
-            when (response) {
-                is Resource.Success -> {
-                    hideProgressBar()
-                    response.data?.let { newsResponse ->
-                        newsAdapterForDb.differ.submitList(newsResponse.articles)
-                    }
-                }
-                is Resource.Error -> {
-                    hideProgressBar()
-                    response.message?.let { message ->
-                        Log.e(TAG, "An error occured: $message")
-                    }
-                }
-                is Resource.Loading -> {
-                    showProgressBar()
-                }
-            }
-        })
-    }
+        viewModel.searchNews.observeForever {
+            newsAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+        }
 
-    private fun hideProgressBar() {
-        paginationProgressBar.visibility = View.INVISIBLE
-    }
-
-    private fun showProgressBar() {
-        paginationProgressBar.visibility = View.VISIBLE
+        newsAdapter.addLoadStateListener { loadState ->
+            paginationProgressBar.isVisible = loadState.source.refresh is LoadState.Loading
+            rvSearchNews.isVisible = loadState.source.refresh is LoadState.NotLoading
+        }
     }
 
     private fun setupRecyclerView() {
-        newsAdapterForDb = NewsAdapterForDb()
+        newsAdapter = NewsAdapter()
         rvSearchNews.apply {
-            adapter = newsAdapterForDb
+            adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
         }
     }
