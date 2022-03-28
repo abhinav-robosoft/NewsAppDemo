@@ -2,8 +2,10 @@ package com.example.newsappdemo.ui.fragment
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.newsappdemo.R
 import com.example.newsappdemo.adapters.NewsAdapter
@@ -31,6 +33,11 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
         viewModel.breakingNews.observeForever {
             newsAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+        }
+
+        newsAdapter.addLoadStateListener { loadState ->
+            paginationProgressBar.isVisible = loadState.source.refresh is LoadState.Loading
+            rvBreakingNews.isVisible = loadState.source.refresh is LoadState.NotLoading
         }
     }
 
